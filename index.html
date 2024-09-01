@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>speed test</title>
+
+</head>
+<body>
+    <input type="button" value="for_dict_test" onclick="test('dict')">
+    <input type="button" value="for_list_test" onclick="test('list')">
+    <script>
+        /*
+        !! 注意 !!
+        `Iterator.prototype.forEach()`はFirefox非対応
+        */
+
+
+        const iters = 100000;
+
+        /**
+         * chrome ES6
+         * 100未満で`for in`
+         * 100以上で`Object.keys (for of)`か`Object.keys (forEach)`
+         */
+        const for_dict_data = {
+            "for in": (obj) => {
+                for (const key in obj) {
+                    obj[key].func();
+                }
+            },
+            "Object.keys (for of)": (obj) => {
+                for (const key of Object.keys(obj)) {
+                    obj[key].func();
+                }
+            },
+            "Object.keys (forEach)": (obj) => {
+                Object.keys(obj).forEach((key) => {
+                    obj[key].func();
+                });
+            },
+            "Object.values (for of)": (obj) => {
+                for (const value of Object.values(obj)) {
+                    value.func();
+                }
+            },
+            "Object.values (forEach)": (obj) => {
+                Object.values(obj).forEach((value) => {
+                    value.func();
+                });
+            },
+            "Object.entries (for of) key": (obj) => {
+                for (const [key, value] of Object.entries(obj)) {
+                    obj[key].func();
+                }
+            },
+            "Object.entries (for of) value": (obj) => {
+                for (const [key, value] of Object.entries(obj)) {
+                    value.func();
+                }
+            },
+            "Object.entries (for of) pair[1]": (obj) => {
+                for (const pair of Object.entries(obj)) {
+                    pair[1].func();
+                }
+            },
+            "Object.entries (forEach) key": (obj) => {
+                Object.entries(obj).forEach(([key, value]) => {
+                    obj[key].func();
+                });
+            },
+            "Object.entries (forEach) value": (obj) => {
+                Object.entries(obj).forEach(([key, value]) => {
+                    value.func();
+                });
+            },
+        }
+
+        /**
+         * chrome ES6
+         * `forEach value`が安定して早い
+         * breakとかは`for of`が安定?
+         */
+        const for_list_data = {
+            "for let (;length;)": (obj) => {
+                for (let i = 0; i < obj.length; i++) {
+                    obj[i].func();
+                }
+            },
+            "for let (length;;)": (obj) => {
+                for (let i = 0, li = obj.length; i < li; i++) {
+                    obj[i].func();
+                }
+            },
+            "for let length(;;)": (obj) => {
+                const li = obj.length;
+                for (let i = 0; i < li; i++) {
+                    obj[i].func();
+                }
+            },
+            "for in": (obj) => {
+                for (const key in obj) {
+                    obj[key].func();
+                }
+            },
+            "for of": (obj) => {
+                for (const value of obj) {
+                    value.func();
+                }
+            },
+            "forEach key": (obj) => {
+                obj.forEach((value, key) => {
+                    obj[key].func();
+                });
+            },
+            "forEach value": (obj) => {
+                obj.forEach((value) => {
+                    value.func();
+                });
+            },
+            "Object.keys (for of)": (obj) => {
+                for (const key of Object.keys(obj)) {
+                    obj[key].func();
+                }
+            },
+            "Object.keys (forEach)": (obj) => {
+                Object.keys(obj).forEach((key) => {
+                    obj[key].func();
+                });
+            },
+            "Object.values (for of)": (obj) => {
+                for (const value of Object.values(obj)) {
+                    value.func();
+                }
+            },
+            "Object.values (forEach)": (obj) => {
+                Object.values(obj).forEach((value) => {
+                    value.func();
+                });
+            },
+            "Array.entries (for of) key": (obj) => {
+                for (const [key, value] of obj.entries()) {
+                    obj[key].func();
+                }
+            },
+            "Array.entries (for of) value": (obj) => {
+                for (const [key, value] of obj.entries()) {
+                    value.func();
+                }
+            },
+            "Array.entries (for of) pair[1]": (obj) => {
+                for (const pair of obj.entries()) {
+                    pair[1].func();
+                }
+            },
+            "Array.entries (forEach) key": (obj) => {
+                obj.entries().forEach(([key, value]) => {
+                    obj[key].func();
+                });
+            },
+            "Array.entries (forEach) value": (obj) => {
+                obj.entries().forEach(([key, value]) => {
+                    value.func();
+                });
+            },
+            "Array.entries (forEach) pair[1]": (obj) => {
+                obj.entries().forEach((pair) => {
+                    pair[1].func();
+                });
+            },
+            "Object.entries (for of) key": (obj) => {
+                for (const [key, value] of Object.entries(obj)) {
+                    obj[key].func();
+                }
+            },
+            "Object.entries (for of) value": (obj) => {
+                for (const [key, value] of Object.entries(obj)) {
+                    value.func();
+                }
+            },
+            "Object.entries (for of) pair[1]": (obj) => {
+                for (const pair of Object.entries(obj)) {
+                    pair[1].func();
+                }
+            },
+            "Object.entries (forEach) key": (obj) => {
+                Object.entries(obj).forEach(([key, value]) => {
+                    obj[key].func();
+                });
+            },
+            "Object.entries (forEach) value": (obj) => {
+                Object.entries(obj).forEach(([key, value]) => {
+                    value.func();
+                });
+            },
+            "Object.entries (forEach) pair[1]": (obj) => {
+                Object.entries(obj).forEach((pair) => {
+                    pair[1].func();
+                });
+            },
+        }
+
+
+        function createDictData(size) {
+            const obj = {};
+            for (let i = 0; i < size; i++) {
+                obj[`key${i}`] = {
+                    value: i,
+                    func: () => {},
+                };
+            }
+            return obj;
+        }
+
+        function createListData(size) {
+            const obj = [];
+            for (let i = 0; i < size; i++) {
+                obj.push({
+                    value: i,
+                    func: () => {},
+                });
+            }
+            return obj;
+        }
+
+        function test(type) {
+            console.log("test start");
+            for (let _ = 0; _ < 4; _++) {
+                const keys = 10 ** _;
+                console.log("--------------------");
+                console.log("size:", keys);
+                let obj, data;
+                switch (type) {
+                    case "dict":
+                        obj = createDictData(keys);
+                        data = for_dict_data;
+                        break;
+                    case "list":
+                        obj = createListData(keys);
+                        data = for_list_data;
+                        break;
+                }
+                console.log("----------");
+
+                for (const [name, func] of Object.entries(data)) {
+                    console.time(name);
+                    for (let i = 0; i < iters; i++) {
+                        func(obj);
+                    }
+                    console.timeEnd(name);
+                }
+            }
+            console.log("test end");
+        }
+    </script>
+</body>
+</html>
